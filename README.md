@@ -9,7 +9,7 @@
 
 **NeuroVoc** is a flexible, biologically inspired vocoder that reconstructs audio signals from simulated auditory nerve activity. It is designed to support both **normal hearing (NH)** and **electrical hearing (EH)** models, allowing for a seamless comparison of auditory perception under different hearing conditions.
 
-![NeuroVoc Diagram](diagram.png)
+![NeuroVoc Diagram](neurovoc.png)
 
 ### 🧭 Diagram Explanation
 
