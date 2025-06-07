@@ -14,8 +14,8 @@ import phast
 import abt
 
 from matlab import MatlabData
-from utils import create_neurogram, bin_over_y
-from plotting import plot_pulse_train_stats
+from experiments.utils import create_neurogram, bin_over_y
+from neurovoc.plotting import plot_pulse_train_stats
 
 FS = 17400
 PATH = glob.glob("/home/nobeljpde1/hearing_model/data/data/original/79*")[0]

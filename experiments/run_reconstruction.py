@@ -7,16 +7,12 @@ from pathlib import Path
 
 import librosa
 import scipy
-import scipy.ndimage
 import numpy as np
-from scipy.signal import lfilter
 import soundfile as sf
-from noisereduce import reduce_noise
 import matplotlib.pyplot as plt
 from time import perf_counter
 
 import phast
-import bruce
 
 from notebooks import utils, plotting
 
@@ -333,6 +329,7 @@ def neurogram_to_wav(data, binsize, audio_size, min_freq, max_freq, resample="po
     
     n_s = int(np.ceil(data.shape[1] / N_HOP))
     echo(n_s, data.shape)
+    
     if resample == 'fft':
         data = np.array([scipy.signal.resample(x, n_s) for x in data]).clip(0, 1)
     elif resample == 'poly':
