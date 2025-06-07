@@ -1,6 +1,6 @@
 # 🧠 NeuroVoc: From Spikes to Speech 🔊
 
-[![arXiv](https://img.shields.io/badge/arXiv-Preprint-orange)](https://arxiv.org/abs/XXXX.XXXXX)  
+[![arXiv](https://img.shields.io/badge/arXiv-Preprint-orange)](https://arxiv.org/abs/2506.03959)  
 *A biologically plausible vocoder for auditory perception modeling and cochlear implant simulation.*
 
 ---
@@ -18,17 +18,10 @@ The diagram above illustrates the NeuroVoc processing pipeline:
 1. **Sound** — An input waveform (e.g., speech) is passed to an auditory model.
 2. **Hearing Model** — This model (e.g., normal hearing or cochlear implant simulation) transforms the sound into a neural representation.
 3. **Neurogram** — The output is a time–frequency matrix of spike counts, simulating auditory nerve activity.
-4. **Decoder** — The neurogram is then converted back into an acoustic waveform using an inverse short-time Fourier transform (STFT)- based decoder.
+4. **Decoder** — The neurogram is then converted back into an acoustic waveform using an inverse short-time Fourier transform (STFT)-based decoder.
 
 This modular flow enables the flexible substitution of different models or model parameters while maintaining a consistent reconstruction backend.
 
----
-
-This repository contains:
-
-- The **NeuroVoc Python package** (modular vocoder)
-- All code for the **experiments and figures** from the paper
-- Data pipeline tools for working with **neurogram representations**
 ---
 
 ## 📁 Repository Structure
@@ -37,7 +30,7 @@ This repository contains:
 neurovoc/
 ├── neurovoc/               # Core vocoder framework (Python package)
 ├── experiments/            # Scripts for model runs and evaluations
-├── data/                   # Example data neurogram data and metadata
+├── data/                   # Example neurogram data and metadata
 ├── figures/                # Diagrams and visualizations
 ├── requirements.txt        # Python dependencies
 └── README.md               # You're here
@@ -54,22 +47,47 @@ git clone https://github.com/jacobdenobel/neurovoc.git
 cd neurovoc
 ```
 
-### 2. Install dependencies
+### 2. Install 
 
 ```bash
-pip install -r requirements.txt
+pip install .
 ```
-
-### 3. Run a reconstruction example
-
-```bash
-python experiments/reconstruct_from_neurogram.py --input data/example_neurogram.npz
-```
-
-This will generate a `.wav` file from a simulated neurogram. You can experiment with different models by swapping in neurogram outputs from alternative auditory simulations. 
 
 ---
 
+## 💻 Command Line Interface (CLI)
+
+NeuroVoc provides a flexible CLI for simulation and vocoding. Once installed, you can use the `neurovoc` command:
+
+### 🔧 Generate a Neurogram
+These commands take an audio waveform and convert it into a neurogram (neural spike representation):
+
+```bash
+neurovoc generate bruce input.wav output.pkl
+neurovoc generate specres input.wav output.pkl
+neurovoc generate ace input.wav output.pkl
+```
+
+Each model supports its own optional flags, like `--n-fibers-per-bin`, `--n-mels`, or `--version` for ACE. Add the `--help` command for more information on a command. 
+
+### 🎧 Reconstruct Audio from Neurogram
+Converts a saved neurogram back into an audio waveform using an inverse STFT-based decoder. Use options like `--n-hop`, `--n-fft`, or `--target-sr` to control reconstruction parameters. 
+
+```bash
+neurovoc reconstruct output.pkl reconstructed.wav
+```
+
+### 🧪 Full Vocoder Run (Simulate + Reconstruct)
+These commands run a full simulation + reconstruction cycle in one go:
+```bash
+neurovoc vocode bruce input.wav output.wav
+neurovoc vocode specres input.wav output.wav
+neurovoc vocode ace input.wav output.wav
+```
+
+Add `--plot` to visualize original vs reconstructed signal.
+
+---
 
 ## 🧠 Citation
 
