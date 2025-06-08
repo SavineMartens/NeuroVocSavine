@@ -15,7 +15,7 @@ class TestGenerate(unittest.TestCase):
 
     def test_specres(self):
         self.assertTrue(os.path.isfile(self.test_file))
-        ng = neurovoc.generate.phast_plus(self.test_file, n_trials=1)
+        ng = neurovoc.specres(self.test_file, n_trials=1)
         
         print(ng)            
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pkl")
@@ -28,11 +28,11 @@ class TestGenerate(unittest.TestCase):
 
     def test_bruce(self):
         self.assertTrue(os.path.isfile(self.test_file))
-        ng = neurovoc.generate.bruce(self.test_file, n_trials=1)
+        ng = neurovoc.bruce(self.test_file, n_trials=1)
         print(ng)      
 
     def test_reconstruct(self):
-        ng = neurovoc.generate.bruce(self.test_file, n_trials=1)
+        ng = neurovoc.bruce(self.test_file, n_trials=1)
         reconstructed = neurovoc.reconstruct(ng)
         audio_signal, audio_fs = librosa.load(self.test_file, sr=None)
 

@@ -9,7 +9,18 @@ import scipy
 import numpy as np
 
 from .generate import Neurogram, min_max_scale
-from .audio_utils import scale_to_target_dbfs
+
+def rms(x):
+    return np.sqrt(np.mean(x ** 2))
+
+def rms_db(y):
+    return 20 * np.log10(rms(y))
+
+def scale_to_target_dbfs(y, target_dbfs):
+    current_dbfs = rms_db(y)
+    diff = target_dbfs - current_dbfs
+    gain = 10 ** (diff / 20)
+    return y * gain
 
 
 def reconstruct_neurogram(
