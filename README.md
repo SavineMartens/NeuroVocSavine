@@ -57,7 +57,11 @@ pip install .
 
 ## 💻 Command Line Interface (CLI)
 
-NeuroVoc provides a flexible CLI for simulation and vocoding. Once installed, you can use the `neurovoc` command:
+NeuroVoc provides a flexible CLI for simulation and vocoding. Once installed, you can use the `neurovoc` command. If you want to know more about a command, or see which options are available, add the `--help` flag. For example: 
+
+```bash
+    neurovoc generate bruce --help
+```
 
 ### 🔧 Generate a Neurogram
 These commands take an audio waveform and convert it into a neurogram (neural spike representation):
@@ -68,7 +72,7 @@ neurovoc generate specres input.wav output.pkl
 neurovoc generate ace input.wav output.pkl
 ```
 
-Each model supports its own optional flags, like `--n-fibers-per-bin`, `--n-mels`, or `--version` for ACE. Add the `--help` command for more information on a command. 
+Each model supports its own optional flags, like `--n-fibers-per-bin`, `--n-mels`, or `--version` for ACE. 
 
 ### 🎧 Reconstruct Audio from Neurogram
 Converts a saved neurogram back into an audio waveform using an inverse STFT-based decoder. Use options like `--n-hop`, `--n-fft`, or `--target-sr` to control reconstruction parameters. 

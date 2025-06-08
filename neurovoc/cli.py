@@ -46,7 +46,7 @@ specres_options = [
 ] + phast_options
 
 ace_options = [
-    click.option("--version", type=click.Choice(["18_0", "25_8"]), default='18_0')
+    click.option("--version", type=click.Choice(["18_0", "25_8"]), default='25_8')
 ] + phast_options
 
 reconstruct_options = [

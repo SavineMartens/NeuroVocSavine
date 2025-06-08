@@ -25,7 +25,6 @@ def get_electrode_freq_ace():
         center_bin = (start_bin + end_bin) / 2
         freqs.append((center_bin * bin_freq_Hz))
         current_bin += width
-
     return np.array(freqs)[::-1]
 
 
@@ -106,7 +105,7 @@ def load_audio(
 
 
 def process_neurogram(
-    neurogram: phast.Neurogram,
+    neurogram_data: np.ndarray,
     fiber_freq: np.ndarray,
     frequencies: np.ndarray,
     window_size: int,
@@ -115,13 +114,16 @@ def process_neurogram(
     name: str,
     duration: float
 ):
-    neurogram_data = bin_over_y(neurogram.data, fiber_freq, frequencies, agg=np.sum)
+    neurogram_data = bin_over_y(neurogram_data, fiber_freq, frequencies, agg=np.sum)
     
-    # The end of response does not mean the end
+    # The end of response does not mean the end of the stimulus
     ng_duration = neurogram_data.shape[1] * binsize
     missing = duration - ng_duration
     zero_columns = int(np.ceil(missing / binsize))
-    neurogram_data = np.c_[neurogram_data, np.zeros((neurogram_data.shape[0], zero_columns))]
+    if zero_columns > 0:
+        neurogram_data = np.c_[neurogram_data, np.zeros((neurogram_data.shape[0], zero_columns))]
+    else:
+        neurogram_data = neurogram_data[:, :zero_columns]
 
     if window_size is not None:
         neurogram_data = smooth(neurogram_data, "hann", window_size, 1)
@@ -189,7 +191,7 @@ def specres(
     )
 
     neurogram = process_neurogram(
-        neurogram, 
+        neurogram.data, 
         fiber_freq, 
         frequencies, 
         window_size, 
@@ -218,9 +220,9 @@ def ace(
     window_size: int = 1500,
     normalize: bool = True,
     seed: int = 42,
-    binsize: float = 3.6e-05,
+    binsize: float = 3.6e-05, 
     n_threads: int = -1,
-    version: str = "25_0",
+    version: str = "25_8",
     **kwargs,
 ) -> Neurogram:
 
@@ -247,12 +249,14 @@ def ace(
         spont_activity=spont_rate,
         stim_db=ref_db,
         n_jobs=n_threads,
-        binsize=binsize,
+        binsize=binsize, #8.54e-05,
         **kwargs,
     )
+    neurogram_data = neurogram.data
+    # neurogram_data = rebin_data(neurogram.data, 8.54e-05, binsize)
 
     neurogram = process_neurogram(
-        neurogram, 
+        neurogram_data, 
         fiber_freq, 
         frequencies, 
         window_size, 
