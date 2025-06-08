@@ -28,6 +28,8 @@ dependencies = [
     "black",
     "click",
     "pandas",
+    "fastdtw",
+    "tqdm"
 ]
 
 [project.urls]

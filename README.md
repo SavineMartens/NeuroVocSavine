@@ -29,12 +29,12 @@ This modular flow enables the flexible substitution of different models or model
 ```
 neurovoc/
 ├── neurovoc/               # Core vocoder framework (Python package)
-├── experiments/            # Scripts for model runs and evaluations
-├── data/                   # Example neurogram data and metadata
-├── figures/                # Diagrams and visualizations
-├── requirements.txt        # Python dependencies
-└── README.md               # You're here
+├── experiments/            # Scripts for generating the figures from the paper
+├── data/                   # Din test data and paper data
+├── tests/                  # Unit tests
 ```
+
+The main package can be found in the neurovoc folder. Experiments holds the notebooks that were used to generate the plots in the paper. The online Digits in Noise test platform, can be found in [this](https://github.com/jacobdenobel/dinweb) repository. 
 
 ---
 
