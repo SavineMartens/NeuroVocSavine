@@ -98,10 +98,11 @@ def load_audio(
 ):
     if isinstance(audio, (str, pathlib.Path)):
         audio_signal, audio_fs = phast.scs.ab.frontend.read_wav(audio, stim_db=ref_db)
-    elif isinstance(audio, [np.ndarray]):
+    elif isinstance(audio, np.ndarray):
         audio_signal = phast.scs.ab.frontend.process_stim(
             audio, audio_fs, stim_db=ref_db
         )
+        audio_fs = 17400
     else:
         if audio_fs is None:
             raise TypeError(
@@ -170,6 +171,7 @@ def specres(
     phast.set_seed(seed)
     np.random.seed(seed)
     frequencies = mel_scale(n_mels, min_freq, max_freq)
+    
     tp = phast.load_df120()
 
     assert max_freq > phast.scs.ab.defaults.ELECTRODE_FREQ_UPPER[-1]
@@ -275,6 +277,19 @@ def ace(
 
     return neurogram
 
+def add_noise(audio, f1 = 0.05, f2 = 0.05):
+    
+    n1 = int(len(audio) * f1)
+    n2 = int(len(audio) * f2)
+    noise = np.random.uniform(
+        low=0.8 * audio.max(), 
+        high=1.2 * audio.max(), 
+        size=n1
+    ) * np.random.choice([-1, 1], size=n1)
+    noise = np.r_[noise, np.random.normal(0, scale=1e-14, size=n2)]
+    padded = np.r_[noise, audio]
+    return padded, 1 - (len(audio) / len(padded))
+
 
 def bruce(
     audio: str | pathlib.Path | np.ndarray,
@@ -299,7 +314,7 @@ def bruce(
 
     if isinstance(audio, (str, pathlib.Path)):
         stim = brucezilany.stimulus.from_file(audio, False, normalize=False)
-    elif isinstance(audio, [np.ndarray]):
+    elif isinstance(audio, np.ndarray):
         duration = (1 / audio_fs) * len(audio)
         stim = brucezilany.stimulus.Stimulus(audio, audio_fs, duration)
     else:
@@ -307,8 +322,9 @@ def bruce(
             raise TypeError(
                 "Wrong audio signal type. If a numpy array is given, audio_fs must also be passed"
             )
-
+        
     stim = brucezilany.stimulus.normalize_db(stim, ref_db)
+    
     frequencies = mel_scale(n_mels, min_freq, max_freq)
 
     n_low = n_med = int(np.floor(n_fibers_per_bin / 5))
@@ -324,7 +340,7 @@ def bruce(
     ng.create(stim, n_rep=n_rep, n_trials=n_trials)
     neurogram_data = ng.get_output().sum(axis=1)
     neurogram_data = rebin_data(neurogram_data, stim.time_resolution, binsize)
-
+    
     if window_size is not None:
         neurogram_data = smooth(neurogram_data, "hann", window_size, 1)
 

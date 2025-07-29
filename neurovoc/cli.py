@@ -72,7 +72,6 @@ def apply_options(options):
         for option in reversed(options):
             f = option(f)
         return f
-
     return wrapper
 
 
