@@ -177,3 +177,5 @@ cython_debug/
 *_neurogram.pkl
 *_reconstructed.wav
 .pdf
+figures/
+sounds/

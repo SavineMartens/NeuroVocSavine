@@ -288,6 +288,7 @@ def bruce(
     n_fibers_per_bin: int = 10,
     window_size: int = 1500,
     normalize: bool = True,
+    random_seed: bool = True,
     seed: int = 42,
     n_threads: int = -1,
     binsize: float = 3.6e-05,
