@@ -135,6 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+venv_neurovoc/
 
 # Spyder project settings
 .spyderproject
