@@ -84,6 +84,33 @@ def smooth(
     )
     return data
 
+def smooth_symmetrical(
+    data: np.ndarray,
+    window_type: str = "hann",
+    window_size: int = 2048,
+    hop_length: int = None,
+) -> np.ndarray:
+    hop_length = hop_length or max(window_size // 4, 1)
+    window = scipy.signal.get_window(window_type, window_size)
+    wsum = window.sum()
+    print('using symmetrical smoothing')
+    pad = window_size // 2  # symmetric padding
+    data = np.vstack(
+        [
+            (
+                np.convolve(
+                    np.pad(data[i], (pad, pad)),  # pad both sides
+                    window,
+                    mode="valid"
+                )[: data[i].size]  # trim back to original length
+                / wsum
+            )[::hop_length]
+            for i in range(data.shape[0])
+        ]
+    )
+    return data
+
+
 
 def min_max_scale(
     data: np.ndarray,
