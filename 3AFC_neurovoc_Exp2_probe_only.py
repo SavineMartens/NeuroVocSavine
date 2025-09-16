@@ -124,7 +124,7 @@ if __name__ == '__main__':
         window_size = 15
         random_seed = True
         # plotting
-        plot_NIR = False
+        plot_NIR = True
         show_neurogram = False
         plot_PSTH = True
         plot_correlation_lags = False
@@ -306,7 +306,7 @@ if __name__ == '__main__':
                 ax1.plot(t_sound_full, original_RT_max, label='$RT_{max}$', linestyle='dotted')
                 ax1.set_xlim((0.2, 0.2065)) 
                 ax1.set_ylim((-1*max(original_RT_max), max(original_RT_max)))
-                ax1.set_title(f'original sound of {os.path.basename(sound_name_RT).replace(".wav", '')}')
+                ax1.set_title(f'original sound of {os.path.basename(sound_name_RT).replace(".wav", "")}')
 
                 # reconstructed sounds
                 ax2.plot(t_probe, X_RT, label='RT', linestyle='dotted')
