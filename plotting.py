@@ -29,7 +29,7 @@ def PSTH_w_max(neurogram_MP, neurogram_M, neurogram_MP_max, fs, MP_str='', M_str
         ax.legend(ncol=2)
         ax.set_xlim(0.19, 0.22)
         ax.set_ylim((min_val, max_val))
-        ax.set_title(f'PSTH {MP_str.replace('.wav', '')}') 
+        ax.set_title(f'PSTH {MP_str.replace(".wav" , "")}') 
         return ax
     else:
         fig = plt.figure()
