@@ -440,7 +440,7 @@ if __name__ == '__main__':
                     probabilities[t, s, index] = 1.0
 
         if plot_PSTH:        
-            fig2.savefig(rf'.\figures\PSTH\masker_{masker_dB}dB_window{window_size}_randomseed{random_seed}.png')
+            fig2.savefig(rf'./figures/PSTH/masker_{masker_dB}dB_window{window_size}_randomseed{random_seed}.png')
 
         ff = plt.figure('probabilities: ' + masker_dB + ' dB')
         for t, temperature in enumerate(temperature_list):
@@ -464,7 +464,7 @@ if __name__ == '__main__':
 
         # plt.ylim((0.45, 1.01))
 
-        ff.savefig(rf'.\figures\Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list[0]}_{temperature_list[-1]}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}.png')
+        ff.savefig(rf'./figures/Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list[0]}_{temperature_list[-1]}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}.png')
 
 
     plt.figure(fig_curve)
