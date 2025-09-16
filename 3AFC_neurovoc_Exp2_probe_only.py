@@ -180,6 +180,8 @@ if __name__ == '__main__':
 
         # get RT list
         RT_list = glob.glob(os.path.join(data_path, 'masker_' + masker_dB+ '*dB.wav'))
+        print(f'Found {len(RT_list)} sounds for masker {masker_dB}dB')
+        print(os.path.join(data_path, 'masker_' + masker_dB+ '.wav'))
         sound_name_R = glob.glob(os.path.join(data_path, 'masker_' + masker_dB+ '.wav'))[0]
         sound_name_RT_max = RT_list[-1]
         RT_max_dB = str(sound_name_RT_max[-8:-6])
