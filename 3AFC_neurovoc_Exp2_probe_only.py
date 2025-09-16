@@ -26,7 +26,7 @@ import platform
 
 # data_path = r"C:\python\MaskerProbePsychometricCurve\sounds\Experiment2_gap30ms"
 # data_path = r"C:\python\MaskerProbePsychometricCurve\sounds\Experiment2"
-data_path = r".\sounds\Experiment2BruceReference91"
+data_path = r"./sounds/Experiment2BruceReference91"
 
 def neurovoc_sound(sound_name, 
                    hearing_type='NH', 
