@@ -121,6 +121,7 @@ if __name__ == '__main__':
         temp_end = args.temp_end
         masker_step = args.masker_step
         masker_start = args.masker_start
+        metric = 'correlation'  # 'correlation' or 'rms'
     else:    
         window_size = 1
         random_seed = False
@@ -134,14 +135,15 @@ if __name__ == '__main__':
         temp_end = args.temp_end
         masker_step = 55
         masker_start = 55
+        metric = 'correlation'  # 'correlation' or 'rms'
 
     # parameters
     plot_auditory_memory = False
     hearing_type = 'NH'  # or 'EH'
     norm_bool = True
-    PSTH_as_RT = False  # If True, use PSTH as RT representation, else use reconstructed sound
-    probe_period_only = False
-    metric = 'rms'  # 'correlation' or 'rms'
+    PSTH_as_RT = True  # If True, use PSTH as RT representation, else use reconstructed sound
+    probe_period_only = True
+
 
     max_masker = 90+masker_step
     masker_list = np.asarray(range(masker_start, max_masker, masker_step))
@@ -252,10 +254,11 @@ if __name__ == '__main__':
         S_max = X_RT_max - X_R1
 
         if plot_PSTH:
-            # fig = PSTH(neurogram_RT_max, neurogram_R1, MP_str=os.path.basename(sound_name_RT_max), M_str=os.path.basename(sound_name_R))
-            fig = PSTH_w_max(neurogram_RT_max.data[f_id,:original_length], neurogram_R1.data[f_id,:original_length], neurogram_RT_max.data[f_id,:original_length], fs, MP_str=os.path.basename(sound_name_RT_max), M_str=os.path.basename(sound_name_R))
             fig2, axes = plt.subplots(4,4, figsize=(15, 15), sharex=True, sharey=True)
             axes = axes.flatten()
+            if platform.system() == 'Windows':
+                # fig = PSTH(neurogram_RT_max, neurogram_R1, MP_str=os.path.basename(sound_name_RT_max), M_str=os.path.basename(sound_name_R))
+                fig = PSTH_w_max(neurogram_RT_max.data[f_id,:original_length], neurogram_R1.data[f_id,:original_length], neurogram_RT_max.data[f_id,:original_length], fs, MP_str=os.path.basename(sound_name_RT_max), M_str=os.path.basename(sound_name_R))
 
         probabilities = np.zeros((len(temperature_list), len(RT_list), 2))  # Store probabilities for R and RT
         correlations_matrix = np.zeros((len(RT_list), 2))  # Store correlations for R and RT
@@ -299,13 +302,19 @@ if __name__ == '__main__':
 
 
             if plot_PSTH:
-                X = PSTH_w_max(neurogram_RT.data[f_id,:original_length], neurogram_R.data[f_id,:original_length], neurogram_RT_max.data[f_id,:original_length], fs, MP_str=os.path.basename(sound_name_RT), M_str=os.path.basename(sound_name_R), ax=axes[s])
+                X = PSTH_w_max(neurogram_RT.data[f_id,:original_length], 
+                               neurogram_R.data[f_id,:original_length], 
+                               neurogram_RT_max.data[f_id,:original_length], 
+                               fs, 
+                               MP_str=os.path.basename(sound_name_RT), 
+                               M_str=os.path.basename(sound_name_R), 
+                               ax=axes[s])
                 rect = plt.Rectangle((left, bottom), width, height,
                         facecolor="black", alpha=0.1)
                 axes[s].add_patch(rect)    
 
             # plot R and RT
-            if plot_NIR:
+            if plot_NIR and platform.system() == 'Windows':
                 f, (ax1, ax2, ax3, ax4) = plt.subplots(4,1, sharex=True, figsize=(12, 8))
                 # original sounds
                 ax1.plot(t_sound_full, original_RT, label='RT', linestyle='dotted')
@@ -448,7 +457,7 @@ if __name__ == '__main__':
         if plot_PSTH:        
             fig2.savefig(rf'./figures/PSTH/masker_{masker_dB}dB_window{window_size}_randomseed{random_seed}.png')
 
-        if metric == 'rms':
+        if metric == 'rms' and platform.system() == 'Windows':
             plt.figure('rms: ' + masker_dB + ' dB')
             plt.plot(dB_list, rms_matrix[:, 0], label=f'RT with masker={masker_dB}dB and RT_max={RT_max_dB}dB')
             plt.plot(dB_list, rms_matrix[:, 1], label=f'R with masker={masker_dB}dB and RT_max={RT_max_dB}dB')
@@ -486,5 +495,6 @@ if __name__ == '__main__':
     plt.subplots_adjust(left=0.05, right=0.98, top=0.9)
     plt.suptitle('Psychometric curves with window size ' + str(window_size) + Title_add)
     plt.tight_layout()
+    fig_curve.savefig(rf'./figures/Psychometric_curve_all_maskers_temp_{temperature_list[0]}_{temperature_list[-1]}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}.png')    
 
     plt.show()
