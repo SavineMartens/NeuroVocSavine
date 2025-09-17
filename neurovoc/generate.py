@@ -285,7 +285,7 @@ def bruce(
     min_freq: int = 150,
     max_freq: int = 10_500,
     n_mels: int = 64,
-    n_fibers_per_bin: int = 10,
+    n_fibers_per_bin: int = 50,
     window_size: int = 1500,
     normalize: bool = True,
     random_seed: bool = True,

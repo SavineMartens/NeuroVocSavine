@@ -20,9 +20,10 @@ import platform
 # [X] is the windowing happening as a noncausal filter??
 
 # [ ] implement noise or use window size as noise?
-# [ ] implement trials
+# [ ] implement trials --> already in Jacob's code
 # [ ] include more fibers
-# [ ] random seed
+# [X] random seed
+
 
 # data_path = r"C:\python\MaskerProbePsychometricCurve\sounds\Experiment2_gap30ms"
 # data_path = r"C:\python\MaskerProbePsychometricCurve\sounds\Experiment2"
@@ -112,7 +113,7 @@ if __name__ == '__main__':
         window_size = args.window  # Window size for Bruce model
         random_seed = args.random_seed
         plot_PSTH = True
-        plot_NIR = True
+        plot_NIR = False
         plot_correlation_lags = False
         show_neurogram = False
         temp_step = args.temp_step
@@ -121,8 +122,8 @@ if __name__ == '__main__':
         masker_step = args.masker_step
         masker_start = args.masker_start
     else:    
-        window_size = 15
-        random_seed = True
+        window_size = 1
+        random_seed = False
         # plotting
         plot_NIR = True
         show_neurogram = False
@@ -138,9 +139,9 @@ if __name__ == '__main__':
     plot_auditory_memory = False
     hearing_type = 'NH'  # or 'EH'
     norm_bool = True
-    PSTH_as_RT = True  # If True, use PSTH as RT representation, else use reconstructed sound
+    PSTH_as_RT = False  # If True, use PSTH as RT representation, else use reconstructed sound
     probe_period_only = False
-    metric = 'correlation'  # 'correlation' or 'rms'
+    metric = 'rms'  # 'correlation' or 'rms'
 
     max_masker = 90+masker_step
     masker_list = np.asarray(range(masker_start, max_masker, masker_step))
@@ -157,6 +158,8 @@ if __name__ == '__main__':
     if metric == 'rms':
         temperature_list = [0.02, 0.04, 0.06, 0.08]
         print('Psychometric curve based on RMS')
+        PSTH_as_RT = False
+        plot_PSTH = False
     elif metric == 'correlation':
         temperature_list = np.arange(temp_start, temp_end+temp_step, temp_step)
         print('Psychometric curve based on Correlation')
@@ -180,6 +183,7 @@ if __name__ == '__main__':
 
         # get RT list
         RT_list = glob.glob(os.path.join(data_path, 'masker_' + masker_dB+ '*dB.wav'))
+        RT_list = sorted(RT_list) # sorting is neccessary for cluster
         print(f'Found {len(RT_list)} sounds for masker {masker_dB}dB')
         print(os.path.join(data_path, 'masker_' + masker_dB+ '.wav'))
         sound_name_R = glob.glob(os.path.join(data_path, 'masker_' + masker_dB+ '.wav'))[0]
@@ -211,7 +215,8 @@ if __name__ == '__main__':
 
         if remove_reference:
             original_length = 14051
-            original_RT_max = original_RT_max[:len(original_RT_max)//2]
+            original_length_sound = 11154
+            original_RT_max = original_RT_max[:original_length_sound]
         else:
             original_length = len(X_R1)
         X_RT_max = X_RT_max[:original_length]
@@ -222,7 +227,8 @@ if __name__ == '__main__':
         t_sound_probe = t_sound_full[int(0.2*fs_sound): int(0.206*fs_sound)]
 
         # probe period = 0.2 to 0.206s
-        probe_period = [0.203, 0.206]
+        probe_correction = 0.005
+        probe_period = np.array([0.201, 0.21]) + probe_correction
         left, bottom, width, height = (probe_period[0], -1, probe_period[1] - probe_period[0], 200)
         rect = plt.Rectangle((left, bottom), width, height,
                         facecolor="black", alpha=0.1)
@@ -284,8 +290,8 @@ if __name__ == '__main__':
                 X_RT = X_RT[:original_length]
 
             if remove_reference:       
-                original_RT = original_RT[:len(original_RT)//2]
-                original_R = original_R[:len(original_R)//2]
+                original_RT = original_RT[:original_length_sound]
+                original_R = original_R[:original_length_sound]
 
             # probe period = 0.2 to 0.206s
             X_RT = X_RT[t_id]
@@ -306,7 +312,7 @@ if __name__ == '__main__':
                 ax1.plot(t_sound_full, original_R, label='R', linestyle='dotted')
                 ax1.plot(t_sound_full, original_RT - original_R, label='RT - R', linestyle='dotted')
                 ax1.plot(t_sound_full, original_RT_max, label='$RT_{max}$', linestyle='dotted')
-                ax1.set_xlim((0.2, 0.2065)) 
+                # ax1.set_xlim((0.2, 0.2065)) 
                 ax1.set_ylim((-1*max(original_RT_max), max(original_RT_max)))
                 ax1.set_title(f'original sound of {os.path.basename(sound_name_RT).replace(".wav", "")}')
 
@@ -332,7 +338,7 @@ if __name__ == '__main__':
                 for a in ax1, ax2, ax3, ax4:
                     a.grid()
                     a.legend()
-                    a.set_xlim((0.19, 0.21)) 
+                    a.set_xlim((0.195, 0.22)) 
                     rect = plt.Rectangle((left, bottom), width, height,
                         facecolor="black", alpha=0.1)
                     a.add_patch(rect)
@@ -441,6 +447,15 @@ if __name__ == '__main__':
 
         if plot_PSTH:        
             fig2.savefig(rf'./figures/PSTH/masker_{masker_dB}dB_window{window_size}_randomseed{random_seed}.png')
+
+        if metric == 'rms':
+            plt.figure('rms: ' + masker_dB + ' dB')
+            plt.plot(dB_list, rms_matrix[:, 0], label=f'RT with masker={masker_dB}dB and RT_max={RT_max_dB}dB')
+            plt.plot(dB_list, rms_matrix[:, 1], label=f'R with masker={masker_dB}dB and RT_max={RT_max_dB}dB')
+            plt.legend()
+            plt.ylabel('RMS ' + Title_add)
+            plt.xlabel('dB')
+
 
         ff = plt.figure('probabilities: ' + masker_dB + ' dB')
         for t, temperature in enumerate(temperature_list):
