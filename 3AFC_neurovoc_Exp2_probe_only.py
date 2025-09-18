@@ -135,14 +135,14 @@ if __name__ == '__main__':
         temp_end = args.temp_end
         masker_step = 55
         masker_start = 55
-        metric = 'correlation'  # 'correlation' or 'rms'
+        metric = 'rms'  # 'correlation' or 'rms'
 
     # parameters
     plot_auditory_memory = False
     hearing_type = 'NH'  # or 'EH'
     norm_bool = True
     PSTH_as_RT = True  # If True, use PSTH as RT representation, else use reconstructed sound
-    probe_period_only = True
+    probe_period_only = False
 
 
     max_masker = 90+masker_step
@@ -160,8 +160,6 @@ if __name__ == '__main__':
     if metric == 'rms':
         temperature_list = [0.02, 0.04, 0.06, 0.08]
         print('Psychometric curve based on RMS')
-        PSTH_as_RT = False
-        plot_PSTH = False
     elif metric == 'correlation':
         temperature_list = np.arange(temp_start, temp_end+temp_step, temp_step)
         print('Psychometric curve based on Correlation')

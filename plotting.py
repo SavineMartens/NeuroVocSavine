@@ -18,7 +18,7 @@ def PSTH_w_max(neurogram_MP, neurogram_M, neurogram_MP_max, fs, MP_str='', M_str
     # fig = plt.figure()
     t = np.arange(neurogram_MP.shape[1]) / fs
     min_val = min(neurogram_MP_max.sum(axis=0) - neurogram_M.sum(axis=0))
-    max_val = max(neurogram_MP_max.sum(axis=0)[int(0.1*len(neurogram_MP_max.sum(axis=0))):])
+    max_val = 2.2* np.median(neurogram_MP_max.sum(axis=0)) #max(neurogram_MP_max.sum(axis=0)[int(0.5*len(neurogram_MP_max.sum(axis=0))):])
     # f_id = np.arange(int(np.argwhere(neurogram_MP.frequencies > 1500)[0][0]), int(np.argwhere(neurogram_MP.frequencies < 2500)[-1][0]))
     if ax:
         ax.plot(t, neurogram_MP.sum(axis=0), label='MP')
