@@ -119,7 +119,7 @@ if __name__ == '__main__':
         show_neurogram = False
         masker_step = args.masker_step
         masker_start = args.masker_start
-        metric = 'correlation'  # 'correlation' or 'rms'
+        metric = 'rms'  # 'correlation' or 'rms'
     else:    
         window_size = 80
         random_seed = True
