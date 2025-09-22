@@ -103,6 +103,7 @@ if __name__ == '__main__':
     parser.add_argument('-temp_step', type=int, help='step size of temperature', default=10000)
     parser.add_argument('-temp_start', type=int, help='start of temperature list', default=2000)
     parser.add_argument('-temp_end', type=int, help='end of temperature list', default=12000)
+    parser.add_argument('-probe_only', action='store_true', help='use only probe period for analysis')
     
     args = parser.parse_args()
 
@@ -116,9 +117,6 @@ if __name__ == '__main__':
         plot_NIR = False
         plot_correlation_lags = False
         show_neurogram = False
-        temp_step = args.temp_step
-        temp_start = args.temp_start
-        temp_end = args.temp_end
         masker_step = args.masker_step
         masker_start = args.masker_start
         metric = 'correlation'  # 'correlation' or 'rms'
@@ -130,19 +128,21 @@ if __name__ == '__main__':
         show_neurogram = False
         plot_PSTH = True
         plot_correlation_lags = False
-        temp_step = args.temp_step
-        temp_start = args.temp_start
-        temp_end = args.temp_end
         masker_step = 10
         masker_start = 30
         metric = 'rms'  # 'correlation' or 'rms'
+
+    temp_step = args.temp_step
+    temp_start = args.temp_start
+    temp_end = args.temp_end
+    probe_period_only = args.probe_only
 
     # parameters
     plot_auditory_memory = False
     hearing_type = 'NH'  # or 'EH'
     norm_bool = True
     PSTH_as_RT = True  # If True, use PSTH as RT representation, else use reconstructed sound
-    probe_period_only = True
+    # probe_period_only = True
 
 
     max_masker = 90+masker_step
