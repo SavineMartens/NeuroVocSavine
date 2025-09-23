@@ -101,8 +101,8 @@ if __name__ == '__main__':
     parser.add_argument('-masker_step', type=int, help='step size of masker dB', default=5)
     parser.add_argument('-masker_start', type=int, help='start of dB list', default=30)
     parser.add_argument('-temp_step', type=float, help='step size of temperature', default=10000)
-    parser.add_argument('-temp_start', type=int, help='start of temperature list', default=2000)
-    parser.add_argument('-temp_end', type=int, help='end of temperature list', default=12000)
+    parser.add_argument('-temp_start', type=float, help='start of temperature list', default=2000)
+    parser.add_argument('-temp_end', type=float, help='end of temperature list', default=12000)
     parser.add_argument('-probe_only', action='store_true', help='use only probe period for analysis')
     
     args = parser.parse_args()
