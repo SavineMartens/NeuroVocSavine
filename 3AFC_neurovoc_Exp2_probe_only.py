@@ -98,12 +98,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-random_seed', action='store_true')
     parser.add_argument('-window', type=int, help='window size', default=15)
-    parser.add_argument('-masker_step', type=int, help='step size of masker dB', default=5)
-    parser.add_argument('-masker_start', type=int, help='start of dB list', default=30)
-    parser.add_argument('-temp_step', type=float, help='step size of temperature', default=10000)
-    parser.add_argument('-temp_start', type=float, help='start of temperature list', default=2000)
-    parser.add_argument('-temp_end', type=float, help='end of temperature list', default=12000)
+    # parser.add_argument('-masker_step', type=int, help='step size of masker dB', default=50)
+    # parser.add_argument('-masker_start', type=int, help='start of dB list', default=30)
+    # parser.add_argument('-temp_step', type=float, help='step size of temperature', default=10000)
+    # parser.add_argument('-temp_start', type=float, help='start of temperature list', default=2000)
+    # parser.add_argument('-temp_end', type=float, help='end of temperature list', default=12000)
     parser.add_argument('-probe_only', action='store_true', help='use only probe period for analysis')
+    parser.add_argument('-PSTH_as_RT', action='store_true', help='use PSTH as RT representation, else use reconstructed sound')
+    parser.add_argument('-metric', type=str, help='metric for psychometric curve', default='rms')
     
     args = parser.parse_args()
 
@@ -117,38 +119,39 @@ if __name__ == '__main__':
         plot_NIR = False
         plot_correlation_lags = False
         show_neurogram = False
-        masker_step = args.masker_step
-        masker_start = args.masker_start
-        metric = 'rms'  # 'correlation' or 'rms'
+        masker_step = 5
+        masker_start = 30
     else:    
         window_size = 80
         random_seed = True
         # plotting
-        plot_NIR = False
+        plot_NIR = True
         show_neurogram = False
         plot_PSTH = True
         plot_correlation_lags = False
-        masker_step = 10
+        # metric = 'rms'  # 'correlation' or 'rms'
+        masker_step = 15
         masker_start = 30
-        metric = 'rms'  # 'correlation' or 'rms'
-
-    temp_step = args.temp_step
-    temp_start = args.temp_start
-    temp_end = args.temp_end
+    
+    metric = args.metric
     probe_period_only = args.probe_only
-
+    PSTH_as_RT = args.PSTH_as_RT  # If True, use PSTH as RT representation, else use reconstructed sound_as_RT_as_RT  
+    
+    
+    temp_step = 2000
+    temp_start = 2000
+    temp_end = 12000
+    
     # parameters
     plot_auditory_memory = False
     hearing_type = 'NH'  # or 'EH'
     norm_bool = True
-    PSTH_as_RT = True  # If True, use PSTH as RT representation, else use reconstructed sound
-    # probe_period_only = True
-
 
     max_masker = 90+masker_step
     masker_list = np.asarray(range(masker_start, max_masker, masker_step))
 
     masker_list = masker_list[masker_list<=90] 
+    print('masker list: ', masker_list)
 
     if 'Reference' in data_path:
         remove_reference = True
@@ -176,7 +179,8 @@ if __name__ == '__main__':
 
     
     fig_curve, axes_curve = plt.subplots(rows, columns, figsize=(15, 15))
-    axes_curve = axes_curve.flatten()
+    if len(masker_list)>1:
+        axes_curve = axes_curve.flatten()
             
     for m, masker_dB in enumerate(masker_list):
         masker_dB = str(masker_dB)
@@ -206,15 +210,16 @@ if __name__ == '__main__':
                                                 window_size=window_size,
                                                 PSTH_as_RT=PSTH_as_RT,
                                                 random_seed=random_seed)
-
+        f_id = np.array([26, 27, 28, 29, 30, 31, 32, 33])
         if PSTH_as_RT:
-            f_id = np.array([26, 27, 28, 29, 30, 31, 32, 33])
             X_RT_max = neurogram_RT_max.data[f_id].sum(axis=0)
             X_R1 = neurogram_R1.data[f_id].sum(axis=0)
             fs = 1/neurogram_RT_max.dt
             print('Using PSTH as RT representation')
+            save_dir = './figures/PSTH_based'
         else:
             fs = fs_sound
+            save_dir = './figures/Sound_based'
 
         if remove_reference:
             original_length = 14051
@@ -358,6 +363,7 @@ if __name__ == '__main__':
                     a.add_patch(rect)
                     
                 plt.tight_layout()
+                f.savefig(rf'{save_dir}/NIR/{os.path.basename(sound_name_RT).replace(".wav", "")}_masker_{masker_dB}dB_window{window_size}_probe_only{probe_period_only}_randomseed{random_seed}.png')
 
             # cross-correlation
             corr_RT = np.max(scipy.signal.correlate(S_max, X_RT-X_R)) #np.corrcoef(S_max, X_RT-X_R)[1,0] # 
@@ -460,7 +466,7 @@ if __name__ == '__main__':
                     probabilities[t, s, index] = 1.0
 
         if plot_PSTH:        
-            fig2.savefig(rf'./figures/PSTH/randomseed{random_seed}/masker_{masker_dB}dB_window{window_size}_randomseed{random_seed}.png')
+            fig2.savefig(rf'{save_dir}/PSTH/randomseed{random_seed}/masker_{masker_dB}dB_window{window_size}_randomseed{random_seed}.png')
 
         if metric == 'rms' and platform.system() == 'Windows':
             figrms = plt.figure('rms') # 'rms: ' + masker_dB + ' dB'
@@ -470,7 +476,6 @@ if __name__ == '__main__':
             plt.ylabel('RMS ' + Title_add)
             plt.xlabel('dB')
             plt.title('RMS values with window: ' + str(window_size))
-
             
 
         ff = plt.figure('probabilities: ' + masker_dB + ' dB')
@@ -495,17 +500,17 @@ if __name__ == '__main__':
 
         # plt.ylim((0.45, 1.01))
 
-        ff.savefig(rf'./figures/{metric}/randomseed{random_seed}/Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list[0]}_{temperature_list[-1]}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')
+        ff.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list[0]}_{temperature_list[-1]}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')
 
 
     plt.figure(fig_curve)
     plt.subplots_adjust(left=0.05, right=0.98, top=0.9)
     # plt.suptitle('Psychometric curves with window size ' + str(window_size) + Title_add)
     plt.tight_layout()
-    fig_curve.savefig(rf'./figures/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_temp_{temperature_list[0]}_{temperature_list[-1]}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')    
+    fig_curve.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_temp_{temperature_list[0]}_{temperature_list[-1]}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')    
 
     if metric == 'rms' and platform.system() == 'Windows':
-        figrms.savefig(rf'./figures/{metric}/randomseed{random_seed}/RMS_window{window_size}_maskers_{masker_list}probe_only{probe_period_only}.png')   
+        figrms.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/RMS_window{window_size}_maskers_{masker_list}probe_only{probe_period_only}.png')   
 
 
     plt.show()
