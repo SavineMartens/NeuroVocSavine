@@ -14,7 +14,7 @@ def PSTH(neurogram_MP, neurogram_M, MP_str='', M_str=''):
     plt.title(f'PSTH {MP_str} and {M_str}')
 
 
-def PSTH_w_max(neurogram_MP, neurogram_M, neurogram_MP_max, fs, MP_str='', M_str='', ax=None):
+def PSTH_w_max(neurogram_MP, neurogram_M, neurogram_MP_max, neurogram_M1, fs, MP_str='', M_str='', ax=None):
     # fig = plt.figure()
     t = np.arange(neurogram_MP.shape[1]) / fs
     min_val = min(neurogram_MP_max.sum(axis=0) - neurogram_M.sum(axis=0))
@@ -24,7 +24,9 @@ def PSTH_w_max(neurogram_MP, neurogram_M, neurogram_MP_max, fs, MP_str='', M_str
         ax.plot(t, neurogram_MP.sum(axis=0), label='MP')
         # ax.plot(t, neurogram_MP_max.data[f_id].sum(axis=0), label='MP$_{max}$', linestyle='dashdot')
         ax.plot(t, neurogram_M.sum(axis=0), label='M', linestyle='dotted')
+        # ax.plot(t, neurogram_M1.sum(axis=0), label='M1', linestyle='dashdot')
         ax.plot(t, neurogram_MP.sum(axis=0) - neurogram_M.sum(axis=0), label='S (MP-M)', linestyle='dashed')
+        ax.plot(t, neurogram_M.sum(axis=0) - neurogram_M1.sum(axis=0), label='M - M', linestyle='dashdot')
         ax.plot(t, neurogram_MP_max.sum(axis=0) - neurogram_M.sum(axis=0), label='S$_{max}$ (MP$_{max}$-M)', linestyle='solid' )
         ax.legend(ncol=2)
         ax.set_xlim(0.19, 0.22)
@@ -35,6 +37,7 @@ def PSTH_w_max(neurogram_MP, neurogram_M, neurogram_MP_max, fs, MP_str='', M_str
         fig = plt.figure()
         plt.plot(t, neurogram_MP.sum(axis=0), label='NH Neurogram - Masker + Probe')
         plt.plot(t, neurogram_MP_max.sum(axis=0), label='NH Neurogram - Masker + Probe max', linestyle='dashdot')
+        plt.plot(t, neurogram_M1.sum(axis=0) - neurogram_M.sum(axis=0), label='M - M', linestyle='dashdot')
         plt.plot(t, neurogram_M.sum(axis=0), label='NH Neurogram - Masker', linestyle='dotted')
         plt.plot(t, neurogram_MP.sum(axis=0) - neurogram_M.sum(axis=0), label='S (MP-M)', linestyle='dashed')
         plt.plot(t, neurogram_MP_max.sum(axis=0) - neurogram_M.sum(axis=0), label='S$_{max}$ (MP$_{max}$-M)', linestyle='solid' )

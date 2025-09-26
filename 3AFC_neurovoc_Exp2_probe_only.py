@@ -43,7 +43,12 @@ def neurovoc_sound(sound_name,
 
     # create neurograms
     if hearing_type == 'NH' and not PSTH_as_RT:
-        neurogram, stim = bruce(sound_name, ref_db=masker_dB_Bruce, audio_fs=fs, window_size=window_size) #32 
+        neurogram, stim = bruce(sound_name, # ref_db=masker_dB_Bruce, audio_fs=fs, window_size=window_size) #32 
+                                ref_db=None, 
+                                audio_fs=fs, 
+                                window_size=window_size, 
+                                normalize=False, 
+                                remove_outliers=False)
     if hearing_type == 'NH' and PSTH_as_RT:
         if not random_seed:
             neurogram, stim = bruce(sound_name, 
@@ -116,26 +121,26 @@ if __name__ == '__main__':
         window_size = args.window  # Window size for Bruce model
         random_seed = args.random_seed
         plot_PSTH = True
-        plot_NIR = False
+        plot_NIR = True
         plot_correlation_lags = False
         show_neurogram = False
         masker_step = 5
         masker_start = 30
     else:    
         window_size = 80
-        random_seed = True
+        random_seed = False
         # plotting
-        plot_NIR = True
+        plot_NIR = False
         show_neurogram = False
         plot_PSTH = True
         plot_correlation_lags = False
         # metric = 'rms'  # 'correlation' or 'rms'
-        masker_step = 15
-        masker_start = 30
+        masker_step = 30
+        masker_start = 60
     
     metric = args.metric
-    probe_period_only = args.probe_only
-    PSTH_as_RT = args.PSTH_as_RT  # If True, use PSTH as RT representation, else use reconstructed sound_as_RT_as_RT  
+    probe_period_only = True #args.probe_only
+    PSTH_as_RT = True#args.PSTH_as_RT  # If True, use PSTH as RT representation, else use reconstructed sound_as_RT_as_RT  
     
     
     temp_step = 2000
@@ -182,6 +187,8 @@ if __name__ == '__main__':
     if len(masker_list)>1:
         axes_curve = axes_curve.flatten()
             
+    dB_list_all = []
+
     for m, masker_dB in enumerate(masker_list):
         masker_dB = str(masker_dB)
         print('masker:', masker_dB)
@@ -227,11 +234,13 @@ if __name__ == '__main__':
             original_RT_max = original_RT_max[:original_length_sound]
         else:
             original_length = len(X_R1)
-        X_RT_max = X_RT_max[:original_length]
-        X_R1 = X_R1[:original_length]
 
-
-
+        if PSTH_as_RT:
+            X_RT_max = X_RT_max[:original_length]
+            X_R1 = X_R1[:original_length]
+        else:
+            X_RT_max = X_RT_max[:original_length_sound]
+            X_R1 = X_R1[:original_length_sound]
 
         # probe period = 0.2 to 0.206s
         probe_correction = 0.005
@@ -267,12 +276,17 @@ if __name__ == '__main__':
             axes = axes.flatten()
             if platform.system() == 'Windows':
                 # fig = PSTH(neurogram_RT_max, neurogram_R1, MP_str=os.path.basename(sound_name_RT_max), M_str=os.path.basename(sound_name_R))
-                fig = PSTH_w_max(neurogram_RT_max.data[f_id,:original_length], neurogram_R1.data[f_id,:original_length], neurogram_RT_max.data[f_id,:original_length], fs, MP_str=os.path.basename(sound_name_RT_max), M_str=os.path.basename(sound_name_R))
+                fig = PSTH_w_max(neurogram_RT_max.data[f_id,:original_length], 
+                                 neurogram_R1.data[f_id,:original_length], 
+                                 neurogram_RT_max.data[f_id,:original_length], 
+                                 neurogram_R1.data[f_id,:original_length],
+                                 fs, MP_str=os.path.basename(sound_name_RT_max), M_str=os.path.basename(sound_name_R))
                 x=3
 
         probabilities = np.zeros((len(temperature_list), len(RT_list), 2))  # Store probabilities for R and RT
         correlations_matrix = np.zeros((len(RT_list), 2))  # Store correlations for R and RT
         dB_list = []
+        
         rms_matrix = np.zeros((len(RT_list), 2))  # Store rms for R and RT
 
         for s, sound_name_RT in enumerate(RT_list):
@@ -296,15 +310,24 @@ if __name__ == '__main__':
             if PSTH_as_RT:
                 X_RT = neurogram_RT.data[f_id].sum(axis=0)
                 X_R = neurogram_R.data[f_id].sum(axis=0)
-
-            if original_length != len(X_R):
-                X_R = X_R[:original_length]
-            if original_length != len(X_RT):
-                X_RT = X_RT[:original_length]
+                if original_length != len(X_R):
+                    X_R = X_R[:original_length]
+                if original_length != len(X_RT):
+                    X_RT = X_RT[:original_length]
+        
+            # if original_length != len(X_R):
+            #     X_R = X_R[:original_length]
+            # if original_length != len(X_RT):
+            #     X_RT = X_RT[:original_length]
 
             if remove_reference:       
                 original_RT = original_RT[:original_length_sound]
                 original_R = original_R[:original_length_sound]
+
+                if not PSTH_as_RT:
+                    X_RT = X_RT[:original_length_sound]
+                    X_R = X_R[:original_length_sound]
+   
 
             # probe period = 0.2 to 0.206s
             X_RT = X_RT[t_id]
@@ -315,6 +338,7 @@ if __name__ == '__main__':
                 X = PSTH_w_max(neurogram_RT.data[f_id,:original_length], 
                                neurogram_R.data[f_id,:original_length], 
                                neurogram_RT_max.data[f_id,:original_length], 
+                               neurogram_R1.data[f_id,:original_length],
                                fs, 
                                MP_str=os.path.basename(sound_name_RT), 
                                M_str=os.path.basename(sound_name_R), 
@@ -332,19 +356,19 @@ if __name__ == '__main__':
                 ax1.plot(t_sound_full, original_RT - original_R, label='RT - R', linestyle='dotted')
                 ax1.plot(t_sound_full, original_RT_max, label='$RT_{max}$', linestyle='dotted')
                 # ax1.set_xlim((0.2, 0.2065)) 
-                ax1.set_ylim((-1*max(original_RT_max), max(original_RT_max)))
+                # ax1.set_ylim((-1*max(original_RT_max), max(original_RT_max)))
                 ax1.set_title(f'original sound of {os.path.basename(sound_name_RT).replace(".wav", "")}')
 
                 # reconstructed sounds
                 ax2.plot(t_probe, X_RT, label='RT', linestyle='dotted')
                 ax2.plot(t_probe, X_RT_max, label = '$RT_{max}$' , linestyle='dotted')
-                ax2.set_ylim(-2*max(X_RT_max[len(X_RT_max)//2:]), 2*max(X_RT_max[len(X_RT_max)//2:]))
+                # ax2.set_ylim(-2*max(X_RT_max[len(X_RT_max)//2:]), 2*max(X_RT_max[len(X_RT_max)//2:]))
                 ax2.set_title('Reconstructed RT')
 
                 # reconstructed sounds
                 ax3.plot(t_probe, X_R, label='R', linestyle='dotted')
                 ax3.plot(t_probe, X_R1, label='R1', linestyle='dotted')
-                ax3.set_ylim(-2*max(X_RT_max[len(X_RT_max)//2:]), 2*max(X_RT_max[len(X_RT_max)//2:]))
+                # ax3.set_ylim(-2*max(X_RT_max[len(X_RT_max)//2:]), 2*max(X_RT_max[len(X_RT_max)//2:]))
                 ax3.set_title('Reconstructed R')
 
                 # analysis representation
@@ -352,7 +376,7 @@ if __name__ == '__main__':
                 ax4.plot(t_probe, X_RT - X_R, label='RT - R', linestyle='dotted')
                 ax4.plot(t_probe, X_R1 - X_R, label='R1 - R', linestyle='dotted')
                 ax4.set_title('Analysis Representation: R(T) - R')
-                ax4.set_ylim((-2*max(S_max[len(S_max)//2:]), 2*max(S_max[len(S_max)//2:])))
+                # ax4.set_ylim((-2*max(S_max[len(S_max)//2:]), 2*max(S_max[len(S_max)//2:])))
 
                 for a in ax1, ax2, ax3, ax4:
                     a.grid()
@@ -465,10 +489,12 @@ if __name__ == '__main__':
                 if inf_present:
                     probabilities[t, s, index] = 1.0
 
+        dB_list_all.append(dB_list)
+
         if plot_PSTH:        
             fig2.savefig(rf'{save_dir}/PSTH/randomseed{random_seed}/masker_{masker_dB}dB_window{window_size}_randomseed{random_seed}.png')
 
-        if metric == 'rms' and platform.system() == 'Windows':
+        if metric == 'rms':
             figrms = plt.figure('rms') # 'rms: ' + masker_dB + ' dB'
             plt.plot(dB_list, rms_matrix[:, 0], label=f'RT with masker={masker_dB}dB')
             # plt.plot(dB_list, rms_matrix[:, 1], label=f'R with masker={masker_dB}dB and RT_max={RT_max_dB}dB')
@@ -476,7 +502,8 @@ if __name__ == '__main__':
             plt.ylabel('RMS ' + Title_add)
             plt.xlabel('dB')
             plt.title('RMS values with window: ' + str(window_size))
-            
+
+
 
         ff = plt.figure('probabilities: ' + masker_dB + ' dB')
         for t, temperature in enumerate(temperature_list):
@@ -500,16 +527,30 @@ if __name__ == '__main__':
 
         # plt.ylim((0.45, 1.01))
 
-        ff.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list[0]}_{temperature_list[-1]}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')
-
+        ff.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')
 
     plt.figure(fig_curve)
     plt.subplots_adjust(left=0.05, right=0.98, top=0.9)
     # plt.suptitle('Psychometric curves with window size ' + str(window_size) + Title_add)
     plt.tight_layout()
-    fig_curve.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_temp_{temperature_list[0]}_{temperature_list[-1]}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')    
+    fig_curve.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_temp_{temperature_list}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')    
 
-    if metric == 'rms' and platform.system() == 'Windows':
+    for t, temp in enumerate(temperature_list):
+        fig_temp_collected=plt.figure(f'All maskers T={temp}')
+        for m, masker_dB in enumerate(masker_list):
+            plt.plot(dB_list_all[m], probabilities[t, :, 0], label=f'masker={masker_dB}dB')
+        plt.xlabel('dB')
+        plt.ylabel('Probability ' + y_label_add + Title_add)
+        plt.title('Psychometric Curve ' + f' for all maskers T={temp} window: {window_size}'   + Title_add)
+        if np.min(probabilities[:,:,0])>0.5:
+            plt.ylim((0.49, 1.01))      
+        plt.legend()
+        fig_temp_collected.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_temp_{temp}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')
+            
+
+
+
+    if metric == 'rms':
         figrms.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/RMS_window{window_size}_maskers_{masker_list}probe_only{probe_period_only}.png')   
 
 
