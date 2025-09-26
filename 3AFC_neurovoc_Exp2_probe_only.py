@@ -121,7 +121,7 @@ if __name__ == '__main__':
         window_size = args.window  # Window size for Bruce model
         random_seed = args.random_seed
         plot_PSTH = True
-        plot_NIR = True
+        plot_NIR = False
         plot_correlation_lags = False
         show_neurogram = False
         masker_step = 5
