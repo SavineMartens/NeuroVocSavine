@@ -506,6 +506,7 @@ if __name__ == '__main__':
 
 
         ff = plt.figure('probabilities: ' + masker_dB + ' dB')
+
         for t, temperature in enumerate(temperature_list):
             plt.plot(dB_list, probabilities[t, :, 0], label=f'T={temperature}')
         plt.xlabel('dB')
@@ -514,6 +515,8 @@ if __name__ == '__main__':
         if np.min(probabilities[:,:,0])>0.5:
             plt.ylim((0.49, 1.01))
         plt.legend()
+        ff.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')
+
 
         plt.figure(fig_curve)
         for t, temperature in enumerate(temperature_list):
@@ -527,8 +530,7 @@ if __name__ == '__main__':
 
         # plt.ylim((0.45, 1.01))
 
-        ff.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')
-
+        
     plt.figure(fig_curve)
     plt.subplots_adjust(left=0.05, right=0.98, top=0.9)
     # plt.suptitle('Psychometric curves with window size ' + str(window_size) + Title_add)
@@ -545,7 +547,7 @@ if __name__ == '__main__':
         if np.min(probabilities[:,:,0])>0.5:
             plt.ylim((0.49, 1.01))      
         plt.legend()
-        fig_temp_collected.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_temp_{temp}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')
+        fig_temp_collected.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_1fig_temp_{temp}_window{window_size}_probe_only{probe_period_only}.png')
             
 
 
