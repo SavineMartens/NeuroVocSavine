@@ -61,3 +61,30 @@ def plot_sum_neurogram(neurogram, title='Neurogram'):
 
 def rms(signal):
     return np.sqrt(np.mean(signal**2))
+
+def compute_d_prime_2matrices_trials_freq(standard_matrix, inverted_matrix):
+    """
+    sources: 
+    - https://eshedmargalit.com/dprime_calculator/
+    - MacMillan 2005, "Detection Theory: A User's Guide" eq (12.2) page 303 Chapter components of Sensitivity
+    - Green, D. M., & Swets, J. A. (1966). Signal detection theory and psychophysics. eq (3.10) page 69
+
+    Compute d-prime across frequency channels.
+
+    Parameters:
+    - standard_matrix: np.ndarray of shape (n_trials, n_freqs)
+    - neurograms_stim2: np.ndarray of shape (n_trials, n_freqs)
+    
+    Returns:
+    - d_prime_vector: np.ndarray of shape (n_freqs,), one d′ per frequency channel
+    """
+    mu1 = np.mean(standard_matrix, axis=0)
+    mu2 = np.mean(inverted_matrix, axis=0)
+       
+    var1 = np.var(standard_matrix, axis=0, ddof=1)
+    var2 = np.var(inverted_matrix, axis=0, ddof=1)
+    
+    pooled_std = np.sqrt(0.5 * (var1 + var2))
+    d_prime_vector = np.abs(mu1 - mu2) / (pooled_std + 1e-9)  # add small constant to avoid divide-by-zero
+    
+    return d_prime_vector
