@@ -103,11 +103,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-random_seed', action='store_true')
     parser.add_argument('-window', type=int, help='window size', default=15)
-    # parser.add_argument('-masker_step', type=int, help='step size of masker dB', default=50)
-    # parser.add_argument('-masker_start', type=int, help='start of dB list', default=30)
-    # parser.add_argument('-temp_step', type=float, help='step size of temperature', default=10000)
-    # parser.add_argument('-temp_start', type=float, help='start of temperature list', default=2000)
-    # parser.add_argument('-temp_end', type=float, help='end of temperature list', default=12000)
     parser.add_argument('-probe_only', action='store_true', help='use only probe period for analysis')
     parser.add_argument('-PSTH_as_RT', action='store_true', help='use PSTH as RT representation, else use reconstructed sound')
     parser.add_argument('-metric', type=str, help='metric for psychometric curve', default='rms')
@@ -127,7 +122,7 @@ if __name__ == '__main__':
         masker_step = 5
         masker_start = 30
     else:    
-        window_size = 80
+        window_size = 120
         random_seed = False
         # plotting
         plot_NIR = False
@@ -135,7 +130,7 @@ if __name__ == '__main__':
         plot_PSTH = True
         plot_correlation_lags = False
         # metric = 'rms'  # 'correlation' or 'rms'
-        masker_step = 30
+        masker_step = 15
         masker_start = 60
     
     metric = args.metric
@@ -188,6 +183,7 @@ if __name__ == '__main__':
         axes_curve = axes_curve.flatten()
             
     dB_list_all = []
+    probabilities_all = np.zeros((len(masker_list), len(temperature_list), 30)) # Store probabilities for all maskers
 
     for m, masker_dB in enumerate(masker_list):
         masker_dB = str(masker_dB)
@@ -486,6 +482,7 @@ if __name__ == '__main__':
                 else:
                     inf_present = False
                 probabilities[t, s,:] = expScores / np.sum(expScores)
+                probabilities_all[m, t, s] = expScores[0] / np.sum(expScores)
                 if inf_present:
                     probabilities[t, s, index] = 1.0
 
@@ -540,14 +537,15 @@ if __name__ == '__main__':
     for t, temp in enumerate(temperature_list):
         fig_temp_collected=plt.figure(f'All maskers T={temp}')
         for m, masker_dB in enumerate(masker_list):
-            plt.plot(dB_list_all[m], probabilities[t, :, 0], label=f'masker={masker_dB}dB')
+            plt.plot(dB_list_all[m], probabilities_all[m, t, :len(dB_list_all[m])], label=f'masker={masker_dB}dB')
         plt.xlabel('dB')
         plt.ylabel('Probability ' + y_label_add + Title_add)
         plt.title('Psychometric Curve ' + f' for all maskers T={temp} window: {window_size}'   + Title_add)
-        if np.min(probabilities[:,:,0])>0.5:
+        if np.min(probabilities_all)>0.5:
             plt.ylim((0.49, 1.01))      
         plt.legend()
-        fig_temp_collected.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_1fig_temp_{temp}_window{window_size}_probe_only{probe_period_only}.png')
+        fig_temp_collected.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/All_maskers_1fig_temp_{temp}_window{window_size}_probe_only{probe_period_only}.png')
+        x=3
             
 
 
