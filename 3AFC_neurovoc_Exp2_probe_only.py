@@ -130,8 +130,8 @@ if __name__ == '__main__':
         plot_PSTH = True
         plot_correlation_lags = False
         # metric = 'rms'  # 'correlation' or 'rms'
-        masker_step = 15
-        masker_start = 60
+        masker_step = 5
+        masker_start = 30
     
     metric = args.metric
     probe_period_only = True #args.probe_only
@@ -161,7 +161,7 @@ if __name__ == '__main__':
         remove_reference = False
 
     if metric == 'rms':
-        temperature_list = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4] #[0.02, 0.04, 0.06, 0.08]
+        temperature_list = np.arange(0.1, 0.6, 0.1) #[0.02, 0.04, 0.06, 0.08]
         print('Psychometric curve based on RMS')
     elif metric == 'correlation':
         temperature_list = np.arange(temp_start, temp_end+temp_step, temp_step)
@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
         # probe period = 0.2 to 0.206s
         probe_correction = 0.005
-        probe_period = np.array([0.195, 0.21]) + probe_correction
+        probe_period = np.array([0.2, 0.204]) + probe_correction
         left, bottom, width, height = (probe_period[0], -1, probe_period[1] - probe_period[0], 200)
         rect = plt.Rectangle((left, bottom), width, height,
                         facecolor="black", alpha=0.1)
@@ -489,7 +489,7 @@ if __name__ == '__main__':
         dB_list_all.append(dB_list)
 
         if plot_PSTH:        
-            fig2.savefig(rf'{save_dir}/PSTH/randomseed{random_seed}/masker_{masker_dB}dB_window{window_size}_randomseed{random_seed}.png')
+            fig2.savefig(rf'{save_dir}/PSTH/randomseed{random_seed}/masker_{masker_dB}dB_window{window_size}_randomseed{random_seed}_probe_period{probe_period}.png')
 
         if metric == 'rms':
             figrms = plt.figure('rms') # 'rms: ' + masker_dB + ' dB'
@@ -512,7 +512,7 @@ if __name__ == '__main__':
         if np.min(probabilities[:,:,0])>0.5:
             plt.ylim((0.49, 1.01))
         plt.legend()
-        ff.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')
+        ff.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_masker_{masker_dB}dB_temp_{temperature_list}_window{window_size}_probe_only{probe_period_only}_probe_period{probe_period}_{metric}_randomseed{random_seed}_metric{metric}.png')
 
 
         plt.figure(fig_curve)
@@ -532,17 +532,17 @@ if __name__ == '__main__':
     plt.subplots_adjust(left=0.05, right=0.98, top=0.9)
     # plt.suptitle('Psychometric curves with window size ' + str(window_size) + Title_add)
     plt.tight_layout()
-    fig_curve.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_temp_{temperature_list}_window{window_size}_probe_only{probe_period_only}_{metric}_randomseed{random_seed}_metric{metric}.png')    
+    fig_curve.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/Psychometric_curve_all_maskers_temp_{temperature_list}_window{window_size}_probe_only{probe_period_only}_probe_period{probe_period}_{metric}_randomseed{random_seed}_metric{metric}.png')    
 
     for t, temp in enumerate(temperature_list):
         fig_temp_collected=plt.figure(f'All maskers T={temp}')
         for m, masker_dB in enumerate(masker_list):
-            plt.plot(dB_list_all[m], probabilities_all[m, t, :len(dB_list_all[m])], label=f'masker={masker_dB}dB')
+            plt.plot(dB_list_all[m], probabilities_all[m, t, :len(dB_list_all[m])], '-o', label=f'masker={masker_dB}dB')
         plt.xlabel('dB')
         plt.ylabel('Probability ' + y_label_add + Title_add)
         plt.title('Psychometric Curve ' + f' for all maskers T={temp} window: {window_size}'   + Title_add)
-        if np.min(probabilities_all)>0.5:
-            plt.ylim((0.49, 1.01))      
+        # if np.min(probabilities_all[:, t, :len(dB_list_all[])])>0.5:
+        plt.ylim((0.49, 1.01))      
         plt.legend()
         fig_temp_collected.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/All_maskers_1fig_temp_{temp}_window{window_size}_probe_only{probe_period_only}.png')
         x=3
