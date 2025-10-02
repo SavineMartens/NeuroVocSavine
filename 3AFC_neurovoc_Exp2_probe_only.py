@@ -544,14 +544,14 @@ if __name__ == '__main__':
         # if np.min(probabilities_all[:, t, :len(dB_list_all[])])>0.5:
         plt.ylim((0.49, 1.01))      
         plt.legend()
-        fig_temp_collected.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/All_maskers_1fig_temp_{temp}_window{window_size}_probe_only{probe_period_only}.png')
+        fig_temp_collected.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/All_maskers_1fig_temp_{temp}_window{window_size}_probe_only{probe_period_only}_probe_period{probe_period}.png')
         x=3
             
 
 
 
     if metric == 'rms':
-        figrms.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/RMS_window{window_size}_maskers_{masker_list}probe_only{probe_period_only}.png')   
+        figrms.savefig(rf'{save_dir}/{metric}/randomseed{random_seed}/RMS_window{window_size}_maskers_{masker_list}probe_only{probe_period_only}_probe_period{probe_period}.png')   
 
 
     plt.show()
